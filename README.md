@@ -12,3 +12,7 @@ Open [DartPad](https://dartpad.dev/), choose Flutter, paste `lib/main.dart`, and
 - Ignore blank task names and keep the remaining counter accurate.
 - Assign each task a unique `ValueKey` and show an empty state when cleared.
 - Run `flutter test`; GitHub Actions analyzes, tests, builds, and publishes the web preview.
+
+## Extended features
+
+See [docs/FEATURES.md](docs/FEATURES.md) for the enhancement list, source layout, and a quick demo checklist.

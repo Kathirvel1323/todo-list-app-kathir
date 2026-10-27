@@ -21,6 +21,8 @@ class TodoItem {
   bool done = false;
 }
 
+enum TaskFilter { all, active, completed }
+
 class TodoScreen extends StatefulWidget {
   const TodoScreen({super.key});
 
@@ -32,7 +34,9 @@ class _TodoScreenState extends State<TodoScreen> {
   final _controller = TextEditingController();
   final List<TodoItem> _items = [];
   int _nextId = 0;
+  TaskFilter _filter = TaskFilter.all;
   int get _remaining => _items.where((item) => !item.done).length;
+  List<TodoItem> get _visibleItems => _items.where((item) => _filter == TaskFilter.all || (_filter == TaskFilter.active && !item.done) || (_filter == TaskFilter.completed && item.done)).toList();
 
   void _addTask() {
     final title = _controller.text.trim();
@@ -65,13 +69,17 @@ class _TodoScreenState extends State<TodoScreen> {
                 ]),
                 const SizedBox(height: 16),
                 Align(alignment: Alignment.centerLeft, child: Chip(label: Text('$_remaining remaining'))),
+                Wrap(spacing: 8, children: [for (final filter in TaskFilter.values) FilterChip(label: Text(switch (filter) { TaskFilter.all => 'All', TaskFilter.active => 'Active', TaskFilter.completed => 'Completed' }), selected: _filter == filter, onSelected: (_) => setState(() => _filter = filter)), if (_items.any((item) => item.done)) ActionChip(label: const Text('Clear completed'), onPressed: () => setState(() => _items.removeWhere((item) => item.done)))]),
+                const SizedBox(height: 8),
                 Expanded(
                   child: _items.isEmpty
                       ? const Center(child: Column(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.task_alt, size: 56, color: Colors.blueGrey), SizedBox(height: 12), Text('Nothing here yet. Add your first task!')]))
-                      : ListView.builder(
-                          itemCount: _items.length,
+                      : _visibleItems.isEmpty
+                          ? const Center(child: Text('No tasks match this filter.'))
+                          : ListView.builder(
+                          itemCount: _visibleItems.length,
                           itemBuilder: (context, index) {
-                            final item = _items[index];
+                            final item = _visibleItems[index];
                             return Dismissible(
                               key: ValueKey(item.id),
                               direction: DismissDirection.endToStart,
